@@ -1,6 +1,6 @@
 import { GraphQLClient } from "graphql-request";
 
-import { createProjectMutation, createUserMutation, deleteProjectMutation, updateProjectMutation, getProjectByIdQuery, getProjectsOfUserQuery, getUserQuery, projectsQuery } from "@/graphql";
+import { createProjectMutation, createUserMutation, deleteProjectMutation, updateProjectMutation, getProjectByIdQuery, getProjectsOfUserQuery, getUserQuery, projectsQueryAll } from "@/graphql";
 import { ProjectForm } from "@/common.types";
 import { categoryFilters } from "@/constants";
 
@@ -42,12 +42,17 @@ const makeGraphQLRequest = async (query: string, variables = {}) => {
   }
 };
 
-export const fetchAllProjects = async(category?: string | null, endcursor?: string | null) => {
-    client.setHeader("x-api-key", apiKey);
-
-    const categories = category ?? ''
-
-    return makeGraphQLRequest(projectsQuery, { categories, endcursor });
+export const fetchAllProjects = async (endcursor?: string | null) => {
+  client.setHeader("x-api-key", apiKey);
+  // if (category) {
+  //   return makeGraphQLRequest(projectsQueryWithFilter, {
+  //     category,
+  //     endcursor,
+  //   });
+  // }
+  return makeGraphQLRequest(projectsQueryAll, {
+    endcursor,
+  });
 };
 
 

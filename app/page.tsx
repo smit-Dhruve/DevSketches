@@ -31,46 +31,51 @@ export const dynamicParams = true;
 export const revalidate = 0;
 
 const Home = async ({ searchParams: { category, endcursor } }: Props) => {
-  const data = await fetchAllProjects(category, endcursor) as ProjectSearch
+  const data = (await fetchAllProjects(endcursor)) as ProjectSearch;
 
-  const projectsToDisplay = data?.projectSearch?.edges || [];
+  let projectToDispay = data?.projectSearch?.edges || [];
+  if (category) {
+    projectToDispay = projectToDispay.filter(
+      (project) => project.node.category == category
+    );
+  }
 
-  if (projectsToDisplay.length === 0) {
+  const pagination = data?.projectSearch?.pageInfo;
+  if (projectToDispay.length === 0) {
     return (
       <section className="flexStart flex-col paddings">
         <Categories />
-
-        <p className="no-result-text text-center">No projects found, go create some first.</p>
+        <p className="text-center no-result-text">
+          No projects found, go get create some projects first
+        </p>
       </section>
-    )
+    );
   }
-
   return (
-    <section className="flexStart flex-col paddings mb-16">
+    <div className="mx-auto p-4 md:max-w-[1250px]">
+      {}
       <Categories />
-
-      <section className="projects-grid">
-        {projectsToDisplay.map(({ node }: { node: ProjectInterface }) => (
+      <section className="projects-grid borde">
+        {projectToDispay.map(({ node }: { node: ProjectInterface }) => (
           <ProjectCard
-            key={`${node?.id}`}
-            id={node?.id}
-            image={node?.image}
-            title={node?.title}
-            name={node?.createdBy.name}
-            avatarUrl={node?.createdBy.avatarUrl}
-            userId={node?.createdBy.id}
+            key={node.id}
+            id={node.id}
+            name={node?.createdBy?.name}
+            image={node.image}
+            title={node.title}
+            avatarUrl={node?.createdBy?.avatarUrl}
+            userId={node?.createdBy?.id}
           />
         ))}
       </section>
-
       <LoadMore
-        startCursor={data?.projectSearch?.pageInfo?.startCursor}
-        endCursor={data?.projectSearch?.pageInfo?.endCursor}
-        hasPreviousPage={data?.projectSearch?.pageInfo?.hasPreviousPage}
-        hasNextPage={data?.projectSearch?.pageInfo.hasNextPage}
+        startCursor={pagination.startCursor}
+        endCursor={pagination.endCursor}
+        hasNextPage={pagination.hasNextPage}
+        hasPreviousPage={pagination.hasPreviousPage}
       />
-    </section>
-  )
+    </div>
+  );
 };
 
 export default Home;
